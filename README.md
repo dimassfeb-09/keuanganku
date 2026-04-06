@@ -111,6 +111,10 @@ lib/
 
 ---
 
+## 🔒 Kebijakan Privasi
+
+Informasi lengkap mengenai bagaimana aplikasi Keuanganku menangani privasi dan melindungi data Anda secara offline dapat dilihat pada halaman [Kebijakan Privasi](PRIVACY.md).
+
 ---
 
 ## 🤝 Kontribusi
