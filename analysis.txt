@@ -1,0 +1,19 @@
+Analyzing keuanganku...                                         
+
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\app_theme.dart:14:9 - deprecated_member_use
+   info - Missing type annotation - lib\core\utils\app_responsive.dart:25:28 - strict_top_level_inference
+   info - Statements in an if should be enclosed in a block - lib\presentation\providers\chart_provider.dart:33:13 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\presentation\providers\filter_provider.dart:76:11 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\presentation\providers\filter_provider.dart:78:11 - curly_braces_in_flow_control_structures
+   info - Unnecessary use of multiple underscores - lib\presentation\screens\budget\budget_screen.dart:129:24 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\presentation\screens\budget\budget_screen.dart:248:34 - unnecessary_underscores
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\presentation\screens\category\add_edit_category_screen.dart:98:31 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\presentation\screens\category\add_edit_category_screen.dart:108:31 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\presentation\screens\category\category_management_screen.dart:187:21 - deprecated_member_use
+warning - Unused import: '../../providers/budget_provider.dart' - lib\presentation\screens\home\home_screen.dart:7:8 - unused_import
+warning - Unused import: 'package:collection/collection.dart' - lib\presentation\screens\home\home_screen.dart:16:8 - unused_import
+   info - Unnecessary use of multiple underscores - lib\presentation\screens\home\widgets\home_budget_banner.dart:93:18 - unnecessary_underscores
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\presentation\screens\transaction\add_transaction_screen.dart:403:23 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\presentation\screens\transaction\add_transaction_screen.dart:410:27 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\presentation\widgets\filter_bar_widget.dart:156:35 - use_build_context_synchronously
+
