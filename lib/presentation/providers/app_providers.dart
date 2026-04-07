@@ -9,16 +9,18 @@ final walletRepositoryProvider = Provider((ref) => WalletRepository());
 final transactionRepositoryProvider = Provider((ref) => TransactionRepository());
 
 // WALLET PROVIDER
-final walletProvider = StateNotifierProvider<WalletNotifier, List<Wallet>>((ref) {
-  return WalletNotifier(ref.read(walletRepositoryProvider), ref);
+final walletProvider = NotifierProvider<WalletNotifier, List<Wallet>>(() {
+  return WalletNotifier();
 });
 
-class WalletNotifier extends StateNotifier<List<Wallet>> {
-  final WalletRepository _repository;
-  final Ref _ref;
+class WalletNotifier extends Notifier<List<Wallet>> {
+  late final WalletRepository _repository;
 
-  WalletNotifier(this._repository, this._ref) : super([]) {
+  @override
+  List<Wallet> build() {
+    _repository = ref.read(walletRepositoryProvider);
     loadWallets();
+    return [];
   }
 
   Future<void> loadWallets() async {
@@ -40,21 +42,23 @@ class WalletNotifier extends StateNotifier<List<Wallet>> {
     await _repository.deleteWallet(id);
     await loadWallets();
     // Cascade effect: refresh transactions as well
-    _ref.invalidate(transactionProvider);
+    ref.invalidate(transactionProvider);
   }
 }
 
 // TRANSACTION PROVIDER
-final transactionProvider = StateNotifierProvider<TransactionNotifier, AsyncValue<List<Transaction>>>((ref) {
-  return TransactionNotifier(ref.read(transactionRepositoryProvider), ref);
+final transactionProvider = NotifierProvider<TransactionNotifier, AsyncValue<List<Transaction>>>(() {
+  return TransactionNotifier();
 });
 
-class TransactionNotifier extends StateNotifier<AsyncValue<List<Transaction>>> {
-  final TransactionRepository _repository;
-  final Ref _ref;
+class TransactionNotifier extends Notifier<AsyncValue<List<Transaction>>> {
+  late final TransactionRepository _repository;
 
-  TransactionNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
+  @override
+  AsyncValue<List<Transaction>> build() {
+    _repository = ref.read(transactionRepositoryProvider);
     loadTransactions();
+    return const AsyncValue.loading();
   }
 
   Future<void> loadTransactions() async {
@@ -71,7 +75,7 @@ class TransactionNotifier extends StateNotifier<AsyncValue<List<Transaction>>> {
       await _repository.addTransaction(transaction);
       // Reload everything after adding transaction
       await loadTransactions();
-      await _ref.read(walletProvider.notifier).loadWallets();
+      await ref.read(walletProvider.notifier).loadWallets();
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -82,7 +86,7 @@ class TransactionNotifier extends StateNotifier<AsyncValue<List<Transaction>>> {
       await _repository.updateTransaction(transaction);
       // Reload everything after updating transaction
       await loadTransactions();
-      await _ref.read(walletProvider.notifier).loadWallets();
+      await ref.read(walletProvider.notifier).loadWallets();
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -92,7 +96,7 @@ class TransactionNotifier extends StateNotifier<AsyncValue<List<Transaction>>> {
     try {
       await _repository.deleteTransaction(id);
       await loadTransactions();
-      await _ref.read(walletProvider.notifier).loadWallets();
+      await ref.read(walletProvider.notifier).loadWallets();
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

@@ -7,12 +7,18 @@ import 'package:uuid/uuid.dart';
 
 final recurringRepositoryProvider = Provider((ref) => RecurringRepository());
 
-class RecurringNotifier extends StateNotifier<AsyncValue<List<RecurringTransaction>>> {
-  final RecurringRepository _repository;
-  final Ref _ref;
+final recurringProvider = NotifierProvider<RecurringNotifier, AsyncValue<List<RecurringTransaction>>>(() {
+  return RecurringNotifier();
+});
 
-  RecurringNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
+class RecurringNotifier extends Notifier<AsyncValue<List<RecurringTransaction>>> {
+  late final RecurringRepository _repository;
+
+  @override
+  AsyncValue<List<RecurringTransaction>> build() {
+    _repository = ref.read(recurringRepositoryProvider);
     loadRecurrings();
+    return const AsyncValue.loading();
   }
 
   Future<void> loadRecurrings() async {
@@ -62,7 +68,7 @@ class RecurringNotifier extends StateNotifier<AsyncValue<List<RecurringTransacti
           categoryId: currentRt.categoryId,
         );
 
-        await _ref.read(transactionProvider.notifier).addTransaction(tx);
+        await ref.read(transactionProvider.notifier).addTransaction(tx);
         
         // Calculate next date
         nextRun = _calculateNextDate(nextRun, currentRt.frequency);
@@ -115,7 +121,3 @@ extension on RecurringTransaction {
     );
   }
 }
-
-final recurringProvider = StateNotifierProvider<RecurringNotifier, AsyncValue<List<RecurringTransaction>>>((ref) {
-  return RecurringNotifier(ref.read(recurringRepositoryProvider), ref);
-});

@@ -38,8 +38,11 @@ class FilterConfig {
   }
 }
 
-class FilterNotifier extends StateNotifier<FilterConfig> {
-  FilterNotifier() : super(FilterConfig());
+class FilterNotifier extends Notifier<FilterConfig> {
+  @override
+  FilterConfig build() {
+    return FilterConfig();
+  }
 
   void updateType(String? type) =>
       state = state.copyWith(type: type, clearType: type == null);
@@ -58,9 +61,7 @@ class FilterNotifier extends StateNotifier<FilterConfig> {
   void reset() => state = FilterConfig();
 }
 
-final filterProvider = StateNotifierProvider<FilterNotifier, FilterConfig>((
-  ref,
-) {
+final filterProvider = NotifierProvider<FilterNotifier, FilterConfig>(() {
   return FilterNotifier();
 });
 

@@ -4,15 +4,18 @@ import '../../data/repositories/category_repository.dart';
 
 final categoryRepositoryProvider = Provider((ref) => CategoryRepository());
 
-final categoryProvider = StateNotifierProvider<CategoryNotifier, AsyncValue<List<Category>>>((ref) {
-  return CategoryNotifier(ref.read(categoryRepositoryProvider));
+final categoryProvider = NotifierProvider<CategoryNotifier, AsyncValue<List<Category>>>(() {
+  return CategoryNotifier();
 });
 
-class CategoryNotifier extends StateNotifier<AsyncValue<List<Category>>> {
-  final CategoryRepository _repository;
+class CategoryNotifier extends Notifier<AsyncValue<List<Category>>> {
+  late final CategoryRepository _repository;
 
-  CategoryNotifier(this._repository) : super(const AsyncValue.loading()) {
+  @override
+  AsyncValue<List<Category>> build() {
+    _repository = ref.read(categoryRepositoryProvider);
     loadCategories();
+    return const AsyncValue.loading();
   }
 
   Future<void> loadCategories() async {
