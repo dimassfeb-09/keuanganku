@@ -5,6 +5,7 @@ import '../../data/models/transaction_model.dart';
 import '../../data/models/category_model.dart';
 import '../../data/models/wallet_model.dart';
 import '../../core/utils/currency_format.dart';
+import '../../core/utils/app_responsive.dart';
 import '../../core/theme/app_colors.dart';
 import '../providers/app_providers.dart';
 import '../screens/transaction/add_transaction_screen.dart';
@@ -16,8 +17,12 @@ void showTransactionDetail(
   Category? category,
   Wallet? wallet,
 ) {
+  final rp = AppResponsive.of(context);
+  
   showModalBottomSheet(
     context: context,
+    isScrollControlled: true,
+    constraints: BoxConstraints(maxWidth: rp.isTablet ? 600 : double.infinity),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -26,7 +31,7 @@ void showTransactionDetail(
       Color color = isIncome ? Colors.green : Colors.red;
 
       return Padding(
-        padding: const EdgeInsets.all(24),
+        padding: rp.cardPadding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,11 +46,11 @@ void showTransactionDetail(
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: rp.isTablet ? 32 : 24),
             Row(
               children: [
                 CircleAvatar(
-                  radius: 30,
+                  radius: rp.isTablet ? 36 : 30,
                   backgroundColor: color.withValues(alpha: 0.1),
                   child: Icon(
                     category != null
@@ -54,7 +59,7 @@ void showTransactionDetail(
                               ? Icons.arrow_downward
                               : Icons.arrow_upward),
                     color: color,
-                    size: 30,
+                    size: rp.isTablet ? 36 : 30,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -63,8 +68,8 @@ void showTransactionDetail(
                   children: [
                     Text(
                       category?.name ?? 'Kategori Dihapus',
-                      style: const TextStyle(
-                        fontSize: 20,
+                      style: TextStyle(
+                        fontSize: rp.isTablet ? 24 : 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -73,6 +78,7 @@ void showTransactionDetail(
                       style: TextStyle(
                         color: color,
                         fontWeight: FontWeight.w500,
+                        fontSize: rp.isTablet ? 16 : 14,
                       ),
                     ),
                   ],
@@ -83,33 +89,36 @@ void showTransactionDetail(
                   style: TextStyle(
                     color: color,
                     fontWeight: FontWeight.bold,
-                    fontSize: 22,
+                    fontSize: rp.isTablet ? 26 : 22,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: rp.isTablet ? 40 : 32),
             _detailRow(
+              rp,
               Icons.calendar_today,
               'Tanggal',
               DateFormat('EEEE, dd MMMM yyyy').format(transaction.date),
             ),
             _detailRow(
+              rp,
               Icons.access_time,
               'Waktu',
               DateFormat('HH:mm').format(transaction.date),
             ),
             _detailRow(
+              rp,
               Icons.account_balance_wallet,
               'Dompet',
               wallet?.name ?? 'Dompet Dihapus',
             ),
             if (transaction.note != null && transaction.note!.isNotEmpty)
-              _detailRow(Icons.notes, 'Catatan', transaction.note!),
-            const SizedBox(height: 32),
+              _detailRow(rp, Icons.notes, 'Catatan', transaction.note!),
+            SizedBox(height: rp.isTablet ? 40 : 32),
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: rp.isTablet ? 60 : 50,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primary,
@@ -128,17 +137,20 @@ void showTransactionDetail(
                     ),
                   );
                 },
-                icon: const Icon(Icons.edit_outlined),
-                label: const Text(
+                icon: Icon(Icons.edit_outlined, size: rp.isTablet ? 24 : 20),
+                label: Text(
                   'Edit Transaksi',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: rp.isTablet ? 16 : 14,
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: rp.isTablet ? 60 : 50,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red[50],
@@ -147,14 +159,17 @@ void showTransactionDetail(
                   side: BorderSide(color: Colors.red[200]!),
                 ),
                 onPressed: () => _confirmDelete(context, ref, transaction.id),
-                icon: const Icon(Icons.delete_outline),
-                label: const Text(
+                icon: Icon(Icons.delete_outline, size: rp.isTablet ? 24 : 20),
+                label: Text(
                   'Hapus Transaksi',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: rp.isTablet ? 16 : 14,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: rp.isTablet ? 24 : 16),
           ],
         ),
       );
@@ -162,22 +177,28 @@ void showTransactionDetail(
   );
 }
 
-Widget _detailRow(IconData icon, String label, String value) {
+Widget _detailRow(AppResponsive rp, IconData icon, String label, String value) {
   return Padding(
-    padding: const EdgeInsets.only(bottom: 16),
+    padding: EdgeInsets.only(bottom: rp.isTablet ? 20 : 16),
     child: Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
+        Icon(icon, size: rp.isTablet ? 24 : 20, color: Colors.grey[600]),
         const SizedBox(width: 12),
         Text(
           '$label:',
-          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+          style: TextStyle(
+            color: Colors.grey[600], 
+            fontSize: rp.isTablet ? 16 : 14,
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+            style: TextStyle(
+              fontWeight: FontWeight.w500, 
+              fontSize: rp.isTablet ? 16 : 14,
+            ),
             textAlign: TextAlign.right,
           ),
         ),

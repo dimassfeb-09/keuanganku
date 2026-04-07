@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/models/category_model.dart';
+import '../../core/utils/app_responsive.dart';
 
 class CategoryGridSelector extends StatelessWidget {
   final List<Category> categories;
@@ -17,23 +18,28 @@ class CategoryGridSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rp = AppResponsive.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Pilih Kategori',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            fontWeight: FontWeight.bold, 
+            fontSize: rp.isTablet ? 18 : 16,
+          ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: rp.isTablet ? 16 : 12),
         GridView.builder(
           padding: EdgeInsets.zero,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 0.85,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: rp.gridCrossAxisCount,
+            mainAxisSpacing: rp.isTablet ? 28 : 16,
+            crossAxisSpacing: rp.isTablet ? 20 : 16,
+            childAspectRatio: rp.isTablet ? 0.95 : 0.85,
           ),
           itemCount: categories.length,
           itemBuilder: (context, index) {
@@ -44,13 +50,13 @@ class CategoryGridSelector extends StatelessWidget {
               onTap: () => onSelected(category.id),
               child: Column(
                 children: [
-                  AnimatedScale(
+                   AnimatedScale(
                     duration: const Duration(milliseconds: 300),
-                    scale: isSelected ? 1.15 : 1.0,
+                    scale: isSelected ? 1.1 : 1.0,
                     curve: Curves.easeOutBack,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(rp.isTablet ? 18 : 12),
                       decoration: BoxDecoration(
                         color: isSelected ? activeColor : Colors.grey[100],
                         shape: BoxShape.circle,
@@ -65,15 +71,15 @@ class CategoryGridSelector extends StatelessWidget {
                       child: Icon(
                         IconData(category.icon, fontFamily: 'MaterialIcons'),
                         color: isSelected ? Colors.white : Colors.grey[600],
-                        size: 24,
+                        size: rp.isTablet ? 32 : 24,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     category.name,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: rp.isTablet ? 14 : 12,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected ? activeColor : Colors.grey[700],
                     ),

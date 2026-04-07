@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/app_providers.dart';
 import '../../../core/utils/currency_format.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/app_responsive.dart';
 
 class AllWalletsScreen extends ConsumerWidget {
   const AllWalletsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rp = AppResponsive.of(context);
     final wallets = ref.watch(walletProvider);
 
     return Scaffold(
@@ -18,15 +20,23 @@ class AllWalletsScreen extends ConsumerWidget {
         backgroundColor: AppColors.background,
       ),
       body: wallets.isEmpty
-          ? const Center(child: Text("Belum ada dompet"))
+          ? Center(
+              child: Text(
+                "Belum ada dompet",
+                style: TextStyle(
+                  fontSize: rp.isTablet ? 18 : 16,
+                  color: Colors.grey,
+                ),
+              ),
+            )
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: rp.pagePadding,
               itemCount: wallets.length,
               itemBuilder: (context, index) {
                 final wallet = wallets[index];
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(20),
+                  padding: rp.cardPadding,
                   decoration: BoxDecoration(
                     color: Color(wallet.color),
                     borderRadius: BorderRadius.circular(24),
@@ -41,12 +51,16 @@ class AllWalletsScreen extends ConsumerWidget {
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(rp.isTablet ? 14 : 12),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.account_balance_wallet, color: Colors.white),
+                        child: Icon(
+                          Icons.account_balance_wallet, 
+                          color: Colors.white,
+                          size: rp.isTablet ? 28 : 24,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -55,17 +69,17 @@ class AllWalletsScreen extends ConsumerWidget {
                           children: [
                             Text(
                               wallet.name,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: rp.isTablet ? 22 : 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Text(
+                            Text(
                               'Saldo Tersedia',
                               style: TextStyle(
                                 color: Colors.white70,
-                                fontSize: 13,
+                                fontSize: rp.isTablet ? 15 : 13,
                               ),
                             ),
                           ],
@@ -73,9 +87,9 @@ class AllWalletsScreen extends ConsumerWidget {
                       ),
                       Text(
                         CurrencyFormat.convertToIdr(wallet.balance, 0),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: rp.isTablet ? 22 : 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

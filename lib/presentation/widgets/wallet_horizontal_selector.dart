@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/wallet_model.dart';
 import '../../core/utils/currency_format.dart';
+import '../../core/utils/app_responsive.dart';
 
 class WalletHorizontalSelector extends StatelessWidget {
   final List<Wallet> wallets;
@@ -16,19 +17,25 @@ class WalletHorizontalSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rp = AppResponsive.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Pilih Dompet',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            fontWeight: FontWeight.bold, 
+            fontSize: rp.isTablet ? 18 : 16,
+          ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: rp.isTablet ? 16 : 12),
         SizedBox(
-          height: 100,
+          height: rp.isTablet ? 140 : 100,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: wallets.length,
+            padding: EdgeInsets.symmetric(vertical: rp.isTablet ? 8 : 4),
             itemBuilder: (context, index) {
               final wallet = wallets[index];
               bool isSelected = wallet.id == selectedWalletId;
@@ -38,9 +45,9 @@ class WalletHorizontalSelector extends StatelessWidget {
                 onTap: () => onSelected(wallet.id),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  width: 160,
-                  margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.all(16),
+                  width: rp.isTablet ? 200 : 160,
+                  margin: EdgeInsets.only(right: rp.itemSpacing),
+                  padding: rp.cardPadding,
                   decoration: BoxDecoration(
                     color: isSelected ? walletColor : Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -64,15 +71,15 @@ class WalletHorizontalSelector extends StatelessWidget {
                         style: TextStyle(
                           color: isSelected ? Colors.white : Colors.black,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: rp.isTablet ? 18 : 14,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
                         CurrencyFormat.convertToIdr(wallet.balance, 0),
                         style: TextStyle(
                           color: isSelected ? Colors.white70 : Colors.grey[600],
-                          fontSize: 12,
+                          fontSize: rp.isTablet ? 16 : 12,
                         ),
                       ),
                     ],

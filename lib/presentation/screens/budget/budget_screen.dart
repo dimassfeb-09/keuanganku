@@ -6,6 +6,7 @@ import '../../widgets/budget_progress_card.dart';
 import 'add_edit_budget_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_format.dart';
+import '../../../core/utils/app_responsive.dart';
 import 'package:intl/intl.dart';
 
 class BudgetScreen extends ConsumerWidget {
@@ -13,6 +14,7 @@ class BudgetScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rp = AppResponsive.of(context);
     final budgetProgressAsync = ref.watch(budgetProgressProvider);
     final now = DateTime.now();
     final monthName = DateFormat('MMMM yyyy', 'id_ID').format(now);
@@ -23,11 +25,13 @@ class BudgetScreen extends ConsumerWidget {
         title: const Text('Anggaran Bulanan'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_chart_rounded),
+            icon: Icon(Icons.add_chart_rounded, size: rp.isTablet ? 28 : 24),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AddEditBudgetScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const AddEditBudgetScreen(),
+                ),
               );
             },
           ),
@@ -39,12 +43,18 @@ class BudgetScreen extends ConsumerWidget {
           budgetProgressAsync.when(
             data: (list) {
               if (list.isEmpty) return const SizedBox();
-              final totalLimit = list.fold<double>(0, (sum, p) => sum + p.budget.amountLimit);
-              final totalSpent = list.fold<double>(0, (sum, p) => sum + p.spentAmount);
-              
+              final totalLimit = list.fold<double>(
+                0,
+                (sum, p) => sum + p.budget.amountLimit,
+              );
+              final totalSpent = list.fold<double>(
+                0,
+                (sum, p) => sum + p.spentAmount,
+              );
+
               return Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(24),
+                padding: rp.cardPadding,
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
@@ -59,13 +69,16 @@ class BudgetScreen extends ConsumerWidget {
                           children: [
                             Text(
                               'Periode $monthName',
-                              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: rp.isTablet ? 14 : 12,
+                              ),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
+                            Text(
                               'Total Anggaran',
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: rp.isTablet ? 22 : 18,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textMain,
                               ),
@@ -74,8 +87,8 @@ class BudgetScreen extends ConsumerWidget {
                         ),
                         Text(
                           CurrencyFormat.convertToIdr(totalLimit, 0),
-                          style: const TextStyle(
-                            fontSize: 20,
+                          style: TextStyle(
+                            fontSize: rp.isTablet ? 24 : 20,
                             fontWeight: FontWeight.w900,
                             color: AppColors.primary,
                           ),
@@ -88,8 +101,10 @@ class BudgetScreen extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: totalLimit > 0 ? (totalSpent / totalLimit) : 0,
                         backgroundColor: Colors.grey[100],
-                        color: totalSpent > totalLimit ? Colors.red : AppColors.primary,
-                        minHeight: 10,
+                        color: totalSpent > totalLimit
+                            ? Colors.red
+                            : AppColors.primary,
+                        minHeight: rp.isTablet ? 14 : 10,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -98,14 +113,19 @@ class BudgetScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Terpakai: ${CurrencyFormat.convertToIdr(totalSpent, 0)}',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: rp.isTablet ? 14 : 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                         Text(
                           '${((totalSpent / totalLimit) * 100).toStringAsFixed(1)}%',
                           style: TextStyle(
-                            fontSize: 12, 
+                            fontSize: rp.isTablet ? 14 : 12,
                             fontWeight: FontWeight.bold,
-                            color: totalSpent > totalLimit ? Colors.red : AppColors.primary,
+                            color: totalSpent > totalLimit
+                                ? Colors.red
+                                : AppColors.primary,
                           ),
                         ),
                       ],
@@ -115,7 +135,7 @@ class BudgetScreen extends ConsumerWidget {
               );
             },
             loading: () => const SizedBox(),
-            error: (_, __) => const SizedBox(),
+            error: (err, st) => const SizedBox(),
           ),
           Expanded(
             child: budgetProgressAsync.when(
@@ -123,9 +143,12 @@ class BudgetScreen extends ConsumerWidget {
                 if (progressList.isEmpty) {
                   return Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(32),
+                      padding: EdgeInsets.all(rp.isTablet ? 48 : 32),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+                        padding: EdgeInsets.symmetric(
+                          vertical: rp.isTablet ? 64 : 48,
+                          horizontal: rp.isTablet ? 32 : 24,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(32),
@@ -146,18 +169,28 @@ class BudgetScreen extends ConsumerWidget {
                                 color: AppColors.primary.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.assignment_outlined, size: 48, color: AppColors.primary),
+                              child: Icon(
+                                Icons.assignment_outlined,
+                                size: rp.isTablet ? 64 : 48,
+                                color: AppColors.primary,
+                              ),
                             ),
                             const SizedBox(height: 24),
-                            const Text(
+                            Text(
                               'Anggaran Bulan Ini Kosong',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: rp.isTablet ? 22 : 18,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
-                            const Text(
+                            Text(
                               'Mulai kelola pengeluaran Anda dengan membuat anggaran kategori hari ini.',
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: rp.isTablet ? 16 : 14,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 32),
@@ -167,7 +200,10 @@ class BudgetScreen extends ConsumerWidget {
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const AddEditBudgetScreen()),
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AddEditBudgetScreen(),
+                                    ),
                                   );
                                 },
                                 icon: const Icon(Icons.add_rounded),
@@ -175,8 +211,12 @@ class BudgetScreen extends ConsumerWidget {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primary,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
                                   elevation: 0,
                                 ),
                               ),
@@ -189,7 +229,7 @@ class BudgetScreen extends ConsumerWidget {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: rp.pagePadding,
                   itemCount: progressList.length,
                   itemBuilder: (context, index) {
                     final progress = progressList[index];
@@ -201,7 +241,7 @@ class BudgetScreen extends ConsumerWidget {
                           (c) => c.id == progress.budget.categoryId,
                           orElse: () => null as dynamic,
                         );
-                        
+
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16),
                           child: InkWell(
@@ -209,7 +249,9 @@ class BudgetScreen extends ConsumerWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => AddEditBudgetScreen(budget: progress.budget),
+                                  builder: (context) => AddEditBudgetScreen(
+                                    budget: progress.budget,
+                                  ),
                                 ),
                               );
                             },
@@ -221,7 +263,7 @@ class BudgetScreen extends ConsumerWidget {
                         );
                       },
                       loading: () => const SizedBox(height: 100),
-                      error: (_, __) => const SizedBox(),
+                      error: (err, st) => const SizedBox(),
                     );
                   },
                 );

@@ -29,7 +29,7 @@ final categoryExpenseChartProvider = Provider<AsyncValue<ChartData>>((ref) {
             (sum, tx) => sum + tx.amount,
           );
 
-          if (total == 0)
+          if (total == 0) {
             return const AsyncValue.data(
               ChartData(
                 sections: [],
@@ -39,6 +39,7 @@ final categoryExpenseChartProvider = Provider<AsyncValue<ChartData>>((ref) {
                 categoryColors: [],
               ),
             );
+          }
 
           final grouped = groupBy(currentMonthExpenses, (tx) => tx.categoryId);
 

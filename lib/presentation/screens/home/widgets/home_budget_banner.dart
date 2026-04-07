@@ -3,20 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/budget_provider.dart';
 import '../../budget/budget_screen.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_responsive.dart';
 
 class HomeBudgetBanner extends ConsumerWidget {
   const HomeBudgetBanner({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rp = AppResponsive.of(context);
     final budgetProgressAsync = ref.watch(budgetProgressProvider);
 
     return budgetProgressAsync.when(
       data: (list) {
         final hasBudget = list.isNotEmpty;
-        
+
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: rp.pagePadding.left,
+            vertical: 8,
+          ),
           child: InkWell(
             onTap: () {
               Navigator.push(
@@ -25,17 +30,21 @@ class HomeBudgetBanner extends ConsumerWidget {
               );
             },
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: rp.cardPadding,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: hasBudget 
-                    ? [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)]
-                    : [Colors.orange[400]!, Colors.orange[700]!],
+                  colors: hasBudget
+                      ? [
+                          AppColors.primary,
+                          AppColors.primary.withValues(alpha: 0.8),
+                        ]
+                      : [Colors.orange[400]!, Colors.orange[700]!],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: (hasBudget ? AppColors.primary : Colors.orange).withValues(alpha: 0.3),
+                    color: (hasBudget ? AppColors.primary : Colors.orange)
+                        .withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -44,36 +53,44 @@ class HomeBudgetBanner extends ConsumerWidget {
               child: Row(
                 children: [
                   Icon(
-                    hasBudget ? Icons.track_changes_rounded : Icons.tips_and_updates_rounded,
+                    hasBudget
+                        ? Icons.track_changes_rounded
+                        : Icons.tips_and_updates_rounded,
                     color: Colors.white,
-                    size: 32,
+                    size: rp.isTablet ? 40 : 32,
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: rp.isTablet ? 20 : 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          hasBudget ? 'Pantau Anggaranmu' : 'Atur Anggaran Bulan Ini',
-                          style: const TextStyle(
+                          hasBudget
+                              ? 'Pantau Anggaranmu'
+                              : 'Atur Anggaran Bulan Ini',
+                          style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: rp.isTablet ? 18 : 16,
                           ),
                         ),
                         Text(
-                          hasBudget 
-                            ? 'Lihat seberapa banyak kamu telah berhemat hari ini.'
-                            : 'Mulai batasi pengeluaran agar keuangan lebih sehat.',
+                          hasBudget
+                              ? 'Lihat seberapa banyak kamu telah berhemat hari ini.'
+                              : 'Mulai batasi pengeluaran agar keuangan lebih sehat.',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 12,
+                            fontSize: rp.isTablet ? 14 : 12,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.white,
+                    size: rp.isTablet ? 20 : 16,
+                  ),
                 ],
               ),
             ),
@@ -81,7 +98,7 @@ class HomeBudgetBanner extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox(),
-      error: (_, __) => const SizedBox(),
+      error: (err, st) => const SizedBox(),
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/app_responsive.dart';
+import '../../../core/widgets/adaptive_layout.dart';
 import '../../providers/chart_provider.dart';
 import '../../providers/budget_provider.dart';
 import '../../providers/category_provider.dart';
@@ -18,273 +20,347 @@ class InsightScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rp = AppResponsive.of(context);
     final summaryAsync = ref.watch(monthlySummaryProvider);
-    final topSpendingAsync = ref.watch(topSpendingCategoriesProvider);
-    final topTransactionsAsync = ref.watch(largestTransactionsProvider);
-
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: summaryAsync.when(
-        data: (summary) => SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _AnimatedSection(
-                delay: 0,
-                child: const Text(
-                  'Analisis Keuangan',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textMain,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // 1. CASHFLOW SUMMARY
-              _AnimatedSection(
-                delay: 100,
-                child: SummaryOverviewCard(summary: summary),
-              ),
-
-              const SizedBox(height: 32),
-
-              // 2. PIE CHART SECTION
-              _AnimatedSection(
-                delay: 200,
-                child: ref
-                    .watch(categoryExpenseChartProvider)
-                    .when(
-                      data: (chartData) => CategoryExpenseChart(
-                        sections: chartData.sections,
-                        totalExpense: chartData.total,
-                        categoryNames: chartData.categoryNames,
-                        categoryIcons: chartData.categoryIcons,
-                        categoryColors: chartData.categoryColors,
-                      ),
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (err, _) => Text('Error Chart: $err'),
-                    ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // 3. BUDGET MONITORING
-              _AnimatedSection(
-                delay: 300,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.track_changes_rounded,
-                          color: AppColors.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Pantau Anggaran',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textMain,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ref
-                        .watch(budgetProgressProvider)
-                        .when(
-                          data: (progressList) {
-                            if (progressList.isEmpty) {
-                              return Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 24,
-                                  horizontal: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.03,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: AppColors.primary.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                  ),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.track_changes_outlined,
-                                        color: AppColors.primary,
-                                        size: 32,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    const Text(
-                                      'Belum ada Anggaran',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const Text(
-                                      'Atur target pengeluaran untuk tiap kategori',
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 13,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const BudgetScreen(),
-                                          ),
-                                        );
-                                      },
-                                      icon: const Icon(Icons.add_rounded),
-                                      label: const Text(
-                                        'Buat Anggaran Pertama',
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 24,
-                                          vertical: 12,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            16,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-                            return Column(
-                              children: [
-                                ...progressList.map((p) {
-                                  final categoriesAsync = ref.watch(
-                                    categoryProvider,
-                                  );
-                                  return categoriesAsync.when(
-                                    data: (categories) {
-                                      final cat = categories.firstWhereOrNull(
-                                        (c) => c.id == p.budget.categoryId,
-                                      );
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 12,
-                                        ),
-                                        child: BudgetProgressCard(
-                                          progress: p,
-                                          categoryName: cat?.name ?? 'Kategori',
-                                        ),
-                                      );
-                                    },
-                                    loading: () => const SizedBox(),
-                                    error: (_, _) => const SizedBox(),
-                                  );
-                                }),
-                                const SizedBox(height: 8),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: TextButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const BudgetScreen(),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(
-                                      Icons.tune_rounded,
-                                      size: 20,
-                                    ),
-                                    label: const Text('Kelola Semua Anggaran'),
-                                    style: TextButton.styleFrom(
-                                      padding: const EdgeInsets.all(16),
-                                      backgroundColor: AppColors.primary
-                                          .withValues(alpha: 0.05),
-                                      foregroundColor: AppColors.primary,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        side: BorderSide(
-                                          color: AppColors.primary.withValues(
-                                            alpha: 0.1,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                          loading: () =>
-                              const Center(child: CircularProgressIndicator()),
-                          error: (err, _) => Text('Error Budget: $err'),
-                        ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // 4. TOP SPENDING CATEGORIES
-              _AnimatedSection(
-                delay: 400,
-                child: topSpendingAsync.when(
-                  data: (spendings) => TopSpendingList(spendings: spendings),
-                  loading: () => const SizedBox(),
-                  error: (_, _) => const SizedBox(),
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // 5. LARGEST TRANSACTIONS
-              _AnimatedSection(
-                delay: 500,
-                child: topTransactionsAsync.when(
-                  data: (transactions) =>
-                      LargestTransactionsList(transactions: transactions),
-                  loading: () => const SizedBox(),
-                  error: (_, _) => const SizedBox(),
-                ),
-              ),
-              const SizedBox(height: 80),
-            ],
-          ),
+        data: (summary) => AdaptiveLayout(
+          mobile: (context) => _buildMobileLayout(context, ref, summary, rp),
+          tablet: (context) => _buildTabletLayout(context, ref, summary, rp),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error: $err')),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context, WidgetRef ref, MonthlySummary summary, AppResponsive rp) {
+    final topSpendingAsync = ref.watch(topSpendingCategoriesProvider);
+    final topTransactionsAsync = ref.watch(largestTransactionsProvider);
+    
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(rp.pagePadding.left, 20, rp.pagePadding.right, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _AnimatedSection(
+            delay: 0,
+            child: Text(
+              'Analisis Keuangan',
+              style: TextStyle(
+                fontSize: rp.isTablet ? 28 : 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textMain,
+              ),
+            ),
+          ),
+          SizedBox(height: rp.isTablet ? 24 : 20),
+
+          // 1. CASHFLOW SUMMARY
+          _AnimatedSection(
+            delay: 100,
+            child: SummaryOverviewCard(summary: summary),
+          ),
+
+          SizedBox(height: rp.sectionSpacing),
+
+          // 2. PIE CHART SECTION
+          _AnimatedSection(
+            delay: 200,
+            child: _buildChart(ref),
+          ),
+
+          SizedBox(height: rp.sectionSpacing),
+
+          // 3. BUDGET MONITORING
+          _AnimatedSection(
+            delay: 300,
+            child: _buildBudgetSection(context, ref, rp),
+          ),
+
+          SizedBox(height: rp.sectionSpacing),
+
+          // 4. TOP SPENDING CATEGORIES
+          _AnimatedSection(
+            delay: 400,
+            child: topSpendingAsync.when(
+              data: (spendings) => TopSpendingList(spendings: spendings),
+              loading: () => const SizedBox(),
+              error: (_, _) => const SizedBox(),
+            ),
+          ),
+
+          SizedBox(height: rp.sectionSpacing),
+
+          // 5. LARGEST TRANSACTIONS
+          _AnimatedSection(
+            delay: 500,
+            child: topTransactionsAsync.when(
+              data: (transactions) =>
+                  LargestTransactionsList(transactions: transactions),
+              loading: () => const SizedBox(),
+              error: (_, _) => const SizedBox(),
+            ),
+          ),
+          const SizedBox(height: 80),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletLayout(BuildContext context, WidgetRef ref, MonthlySummary summary, AppResponsive rp) {
+    final topSpendingAsync = ref.watch(topSpendingCategoriesProvider);
+    final topTransactionsAsync = ref.watch(largestTransactionsProvider);
+    
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(rp.pagePadding.left, 32, rp.pagePadding.right, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _AnimatedSection(
+            delay: 0,
+            child: Text(
+              'Analisis Keuangan',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textMain,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left Column
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    _AnimatedSection(
+                      delay: 100,
+                      child: SummaryOverviewCard(summary: summary),
+                    ),
+                    const SizedBox(height: 32),
+                    _AnimatedSection(
+                      delay: 200,
+                      child: _buildChart(ref),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 32),
+              // Right Column
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    _AnimatedSection(
+                      delay: 300,
+                      child: _buildBudgetSection(context, ref, rp),
+                    ),
+                    const SizedBox(height: 32),
+                     _AnimatedSection(
+                      delay: 400,
+                      child: topSpendingAsync.when(
+                        data: (spendings) => TopSpendingList(spendings: spendings),
+                        loading: () => const SizedBox(),
+                        error: (_, _) => const SizedBox(),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    _AnimatedSection(
+                      delay: 500,
+                      child: topTransactionsAsync.when(
+                        data: (transactions) =>
+                            LargestTransactionsList(transactions: transactions),
+                        loading: () => const SizedBox(),
+                        error: (_, _) => const SizedBox(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChart(WidgetRef ref) {
+    return ref.watch(categoryExpenseChartProvider).when(
+      data: (chartData) => CategoryExpenseChart(
+        sections: chartData.sections,
+        totalExpense: chartData.total,
+        categoryNames: chartData.categoryNames,
+        categoryIcons: chartData.categoryIcons,
+        categoryColors: chartData.categoryColors,
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => Text('Error Chart: $err'),
+    );
+  }
+
+  Widget _buildBudgetSection(BuildContext context, WidgetRef ref, AppResponsive rp) {
+    final budgetProgressAsync = ref.watch(budgetProgressProvider);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.track_changes_rounded,
+              color: AppColors.primary,
+              size: rp.isTablet ? 24 : 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Pantau Anggaran',
+              style: TextStyle(
+                fontSize: rp.isTablet ? 22 : 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textMain,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        budgetProgressAsync.when(
+          data: (progressList) {
+            if (progressList.isEmpty) {
+              return _emptyBudgetState(context, rp);
+            }
+            return Column(
+              children: [
+                ...progressList.map((p) {
+                  final categoriesAsync = ref.watch(categoryProvider);
+                  return categoriesAsync.when(
+                    data: (categories) {
+                      final cat = categories.firstWhereOrNull(
+                        (c) => c.id == p.budget.categoryId,
+                      );
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: BudgetProgressCard(
+                          progress: p,
+                          categoryName: cat?.name ?? 'Kategori',
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox(),
+                    error: (_, _) => const SizedBox(),
+                  );
+                }),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BudgetScreen(),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.tune_rounded,
+                      size: rp.isTablet ? 24 : 20,
+                    ),
+                    label: Text(
+                      'Kelola Semua Anggaran',
+                      style: TextStyle(fontSize: rp.isTablet ? 16 : 14),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.all(16),
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.05),
+                      foregroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Text('Error Budget: $err'),
+        ),
+      ],
+    );
+  }
+
+  Widget _emptyBudgetState(BuildContext context, AppResponsive rp) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(rp.isTablet ? 32 : 24),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.track_changes_outlined,
+              color: AppColors.primary,
+              size: rp.isTablet ? 40 : 32,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Belum ada Anggaran',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: rp.isTablet ? 20 : 16,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Atur target pengeluaran untuk tiap kategori',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: rp.isTablet ? 15 : 13,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BudgetScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Buat Anggaran Pertama'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

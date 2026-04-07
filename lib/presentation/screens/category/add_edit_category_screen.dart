@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/app_responsive.dart';
 import '../../../data/models/category_model.dart';
 import '../../providers/category_provider.dart';
 
@@ -94,7 +95,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         name: name,
         type: _type,
         icon: _selectedIcon,
-        color: _selectedColor.value,
+        color: _selectedColor.toARGB32(),
         isActive: widget.category!.isActive,
       );
       ref.read(categoryProvider.notifier).updateCategory(updatedCategory);
@@ -104,7 +105,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         name: name,
         type: _type,
         icon: _selectedIcon,
-        color: _selectedColor.value,
+        color: _selectedColor.toARGB32(),
         isActive: true,
       );
       ref.read(categoryProvider.notifier).addCategory(newCategory);
@@ -113,13 +114,13 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     Navigator.pop(context);
   }
 
-  Widget _buildLivePreview() {
+  Widget _buildLivePreview(AppResponsive rp) {
     final color = _type == 'expense' ? AppColors.expense : AppColors.income;
     return Center(
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(rp.isTablet ? 24 : 20),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
@@ -127,21 +128,24 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             child: Icon(
               IconData(_selectedIcon, fontFamily: 'MaterialIcons'),
               color: _selectedColor,
-              size: 40,
+              size: rp.isTablet ? 48 : 40,
             ),
           ),
           const SizedBox(height: 12),
           Text(
             _nameController.text.isEmpty ? 'Nama Kategori' : _nameController.text,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: rp.isTablet ? 24 : 20,
               fontWeight: FontWeight.bold,
               color: _nameController.text.isEmpty ? Colors.grey[400] : AppColors.textMain,
             ),
           ),
           Text(
             _type == 'expense' ? 'Pengeluaran' : 'Pemasukan',
-            style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 14),
+            style: TextStyle(
+              color: color.withValues(alpha: 0.7), 
+              fontSize: rp.isTablet ? 16 : 14,
+            ),
           ),
         ],
       ),
@@ -150,6 +154,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final rp = AppResponsive.of(context);
     bool isEdit = widget.category != null;
 
     return Scaffold(
@@ -158,177 +163,217 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         title: Text(isEdit ? 'Ubah Kategori' : 'Tambah Kategori'),
         backgroundColor: AppColors.background,
         elevation: 0,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildLivePreview(),
-            const SizedBox(height: 40),
-            
-            TextField(
-              controller: _nameController,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              decoration: InputDecoration(
-                labelText: 'Nama Kategori',
-                hintText: 'Contoh: Belanja, Gaji...',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                prefixIcon: const Icon(Icons.edit_rounded, color: Colors.indigo),
-              ),
-            ),
-            
-            const SizedBox(height: 24),
-            const Text('Tipe Transaksi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 12),
-            Row(
+        padding: EdgeInsets.fromLTRB(rp.pagePadding.left, 24, rp.pagePadding.right, 24),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: rp.isTablet ? 600 : double.infinity),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: isEdit ? null : () => setState(() => _type = 'expense'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _type == 'expense' ? AppColors.expense : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _type == 'expense' ? AppColors.expense : Colors.grey[200]!,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Pengeluaran',
-                          style: TextStyle(
-                            color: _type == 'expense' ? Colors.white : Colors.grey[600],
-                            fontWeight: FontWeight.bold,
+                _buildLivePreview(rp),
+                const SizedBox(height: 40),
+                
+                TextField(
+                  controller: _nameController,
+                  style: TextStyle(
+                    fontSize: rp.isTablet ? 20 : 18, 
+                    fontWeight: FontWeight.w600,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Nama Kategori',
+                    hintText: 'Contoh: Belanja, Gaji...',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.edit_rounded, 
+                      color: Colors.indigo,
+                      size: rp.isTablet ? 28 : 24,
+                    ),
+                    contentPadding: EdgeInsets.all(rp.isTablet ? 20 : 16),
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                Text(
+                  'Tipe Transaksi', 
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, 
+                    fontSize: rp.isTablet ? 18 : 16,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: isEdit ? null : () => setState(() => _type = 'expense'),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: rp.isTablet ? 16 : 12),
+                          decoration: BoxDecoration(
+                            color: _type == 'expense' ? AppColors.expense : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _type == 'expense' ? AppColors.expense : Colors.grey[200]!,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Pengeluaran',
+                              style: TextStyle(
+                                color: _type == 'expense' ? Colors.white : Colors.grey[600],
+                                fontWeight: FontWeight.bold,
+                                fontSize: rp.isTablet ? 16 : 14,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: isEdit ? null : () => setState(() => _type = 'income'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _type == 'income' ? AppColors.income : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _type == 'income' ? AppColors.income : Colors.grey[200]!,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Pemasukan',
-                          style: TextStyle(
-                            color: _type == 'income' ? Colors.white : Colors.grey[600],
-                            fontWeight: FontWeight.bold,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: isEdit ? null : () => setState(() => _type = 'income'),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: rp.isTablet ? 16 : 12),
+                          decoration: BoxDecoration(
+                            color: _type == 'income' ? AppColors.income : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _type == 'income' ? AppColors.income : Colors.grey[200]!,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Pemasukan',
+                              style: TextStyle(
+                                color: _type == 'income' ? Colors.white : Colors.grey[600],
+                                fontWeight: FontWeight.bold,
+                                fontSize: rp.isTablet ? 16 : 14,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
+                  ],
+                ),
+                
+                const SizedBox(height: 32),
+                Text(
+                  'Pilih Warna', 
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, 
+                    fontSize: rp.isTablet ? 18 : 16,
                   ),
                 ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: rp.isTablet ? 60 : 50,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _availableColors.length,
+                    itemBuilder: (context, index) {
+                      final color = _availableColors[index];
+                      bool isSelected = _selectedColor == color;
+  
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedColor = color),
+                        child: Container(
+                          width: rp.isTablet ? 50 : 40,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: isSelected ? Border.all(color: Colors.black, width: 2) : null,
+                            boxShadow: isSelected ? [
+                              BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 4))
+                            ] : null,
+                          ),
+                          child: isSelected ? Icon(
+                            Icons.check, 
+                            color: Colors.white, 
+                            size: rp.isTablet ? 24 : 20,
+                          ) : null,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+                Text(
+                  'Pilih Ikon', 
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, 
+                    fontSize: rp.isTablet ? 18 : 16,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: rp.isTablet ? 8 : 6,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                  ),
+                  itemCount: _availableIcons.length,
+                  itemBuilder: (context, index) {
+                    final icon = _availableIcons[index];
+                    bool isSelected = _selectedIcon == icon.codePoint;
+  
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedIcon = icon.codePoint),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        decoration: BoxDecoration(
+                          color: isSelected ? _selectedColor : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: isSelected ? [
+                            BoxShadow(color: _selectedColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
+                          ] : null,
+                        ),
+                        child: Icon(
+                          icon,
+                          color: isSelected ? Colors.white : Colors.grey[400],
+                          size: rp.isTablet ? 24 : 20,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 48),
+                SizedBox(
+                  width: double.infinity,
+                  height: rp.isTablet ? 64 : 56,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 4,
+                    ),
+                    onPressed: _submit,
+                    child: Text(
+                      isEdit ? 'Simpan Perubahan' : 'Buat Kategori',
+                      style: TextStyle(
+                        fontSize: rp.isTablet ? 18 : 16, 
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
               ],
             ),
-            
-            const SizedBox(height: 32),
-            const SizedBox(height: 32),
-            const Text('Pilih Warna', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 50,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _availableColors.length,
-                itemBuilder: (context, index) {
-                  final color = _availableColors[index];
-                  bool isSelected = _selectedColor == color;
-
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedColor = color),
-                    child: Container(
-                      width: 40,
-                      margin: const EdgeInsets.only(right: 12),
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                        border: isSelected ? Border.all(color: Colors.black, width: 2) : null,
-                        boxShadow: isSelected ? [
-                          BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 4))
-                        ] : null,
-                      ),
-                      child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
-                    ),
-                  );
-                },
-              ),
-            ),
-            
-            const SizedBox(height: 32),
-            const Text('Pilih Ikon', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 16),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 6,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-              ),
-              itemCount: _availableIcons.length,
-              itemBuilder: (context, index) {
-                final icon = _availableIcons[index];
-                bool isSelected = _selectedIcon == icon.codePoint;
-
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedIcon = icon.codePoint),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    decoration: BoxDecoration(
-                      color: isSelected ? _selectedColor : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: isSelected ? [
-                        BoxShadow(color: _selectedColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
-                      ] : null,
-                    ),
-                    child: Icon(
-                      icon,
-                      color: isSelected ? Colors.white : Colors.grey[400],
-                      size: 20,
-                    ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 48),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 4,
-                ),
-                onPressed: _submit,
-                child: Text(
-                  isEdit ? 'Simpan Perubahan' : 'Buat Kategori',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
+          ),
         ),
       ),
     );

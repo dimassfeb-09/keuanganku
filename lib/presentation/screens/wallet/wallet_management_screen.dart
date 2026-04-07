@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_format.dart';
+import '../../../core/utils/app_responsive.dart';
 import '../../providers/app_providers.dart';
 import 'add_edit_wallet_screen.dart';
 
@@ -10,6 +11,14 @@ class WalletManagementScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    return _WalletManagementScreenContent();
+  }
+}
+
+class _WalletManagementScreenContent extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rp = AppResponsive.of(context);
     final wallets = ref.watch(walletProvider);
 
     // Hitung total saldo
@@ -24,19 +33,19 @@ class WalletManagementScreen extends ConsumerWidget {
         title: const Text('Kelola Dompet'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.fromLTRB(rp.pagePadding.left, 20, rp.pagePadding.right, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
             // HEADER: TOTAL BALANCE OVERVIEW
-            _buildTotalOverview(totalBalance),
+            _buildTotalOverview(rp, totalBalance),
   
             const SizedBox(height: 32),
-            const Text(
+            Text(
               'Daftar Dompet',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: rp.isTablet ? 22 : 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textMain,
               ),
@@ -51,9 +60,9 @@ class WalletManagementScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 if (index < wallets.length) {
                   final wallet = wallets[index];
-                  return _buildWalletCard(context, ref, wallet);
+                  return _buildWalletCard(context, ref, rp, wallet);
                 } else {
-                  return _buildAddWalletCard(context);
+                  return _buildAddWalletCard(context, rp);
                 }
               },
             ),
@@ -64,10 +73,10 @@ class WalletManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTotalOverview(double total) {
+  Widget _buildTotalOverview(AppResponsive rp, double total) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: rp.cardPadding,
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
         borderRadius: BorderRadius.circular(24),
@@ -82,16 +91,19 @@ class WalletManagementScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Total Keseluruhan Saldo',
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+            style: TextStyle(
+              color: Colors.white70, 
+              fontSize: rp.isTablet ? 16 : 14,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             CurrencyFormat.convertToIdr(total, 0),
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 32,
+              fontSize: rp.isTablet ? 40 : 32,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -100,14 +112,14 @@ class WalletManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildWalletCard(BuildContext context, WidgetRef ref, dynamic wallet) {
+  Widget _buildWalletCard(BuildContext context, WidgetRef ref, AppResponsive rp, dynamic wallet) {
     final color = Color(wallet.color);
 
     return GestureDetector(
-      onTap: () => _showWalletOptions(context, ref, wallet),
+      onTap: () => _showWalletOptions(context, ref, rp, wallet),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(20),
+        padding: rp.cardPadding,
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(20),
@@ -127,29 +139,32 @@ class WalletManagementScreen extends ConsumerWidget {
               children: [
                 Text(
                   wallet.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: rp.isTablet ? 24 : 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.account_balance_wallet,
                   color: Colors.white70,
-                  size: 24,
+                  size: rp.isTablet ? 30 : 24,
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Saldo Tersedia',
-              style: TextStyle(color: Colors.white70, fontSize: 12),
+              style: TextStyle(
+                color: Colors.white70, 
+                fontSize: rp.isTablet ? 14 : 12,
+              ),
             ),
             Text(
               CurrencyFormat.convertToIdr(wallet.balance, 0),
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: rp.isTablet ? 30 : 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -159,7 +174,7 @@ class WalletManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAddWalletCard(BuildContext context) {
+  Widget _buildAddWalletCard(BuildContext context, AppResponsive rp) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Material(
@@ -181,7 +196,10 @@ class WalletManagementScreen extends ConsumerWidget {
               ),
               color: AppColors.primary.withValues(alpha: 0.05),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            padding: EdgeInsets.symmetric(
+              vertical: rp.isTablet ? 24 : 16, 
+              horizontal: 16,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -191,18 +209,18 @@ class WalletManagementScreen extends ConsumerWidget {
                     color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.add_rounded,
                     color: AppColors.primary,
-                    size: 20,
+                    size: rp.isTablet ? 24 : 20,
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Text(
+                Text(
                   'Tambah Dompet Baru',
                   style: TextStyle(
                     color: AppColors.primary,
-                    fontSize: 15,
+                    fontSize: rp.isTablet ? 18 : 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -214,7 +232,7 @@ class WalletManagementScreen extends ConsumerWidget {
     );
   }
 
-  void _showWalletOptions(BuildContext context, WidgetRef ref, dynamic wallet) {
+  void _showWalletOptions(BuildContext context, WidgetRef ref, AppResponsive rp, dynamic wallet) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -222,7 +240,12 @@ class WalletManagementScreen extends ConsumerWidget {
       ),
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.fromLTRB(
+            rp.isTablet ? 32 : 24, 
+            24, 
+            rp.isTablet ? 32 : 24, 
+            32,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -235,15 +258,19 @@ class WalletManagementScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Opsi Dompet',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: rp.isTablet ? 22 : 18, 
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 24),
               _optionTile(
                 Icons.edit_outlined,
                 'Edit Dompet',
                 Colors.indigo,
+                rp,
                 () {
                   Navigator.pop(context);
                   Navigator.push(
@@ -254,10 +281,16 @@ class WalletManagementScreen extends ConsumerWidget {
                   );
                 },
               ),
-              _optionTile(Icons.delete_outline, 'Hapus Dompet', Colors.red, () {
-                Navigator.pop(context);
-                _confirmDelete(context, ref, wallet);
-              }),
+              _optionTile(
+                Icons.delete_outline, 
+                'Hapus Dompet', 
+                Colors.red, 
+                rp,
+                () {
+                  Navigator.pop(context);
+                  _confirmDelete(context, ref, wallet);
+                },
+              ),
               const SizedBox(height: 16),
             ],
           ),
@@ -270,13 +303,22 @@ class WalletManagementScreen extends ConsumerWidget {
     IconData icon,
     String label,
     Color color,
+    AppResponsive rp,
     VoidCallback onTap,
   ) {
     return ListTile(
-      leading: Icon(icon, color: color),
+      leading: Icon(
+        icon, 
+        color: color,
+        size: rp.isTablet ? 28 : 24,
+      ),
       title: Text(
         label,
-        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: color, 
+          fontWeight: FontWeight.bold,
+          fontSize: rp.isTablet ? 18 : 16,
+        ),
       ),
       onTap: onTap,
     );

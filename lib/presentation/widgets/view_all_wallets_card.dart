@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/app_responsive.dart';
 import '../screens/wallet/all_wallets_screen.dart';
 
 class ViewAllWalletsCard extends StatelessWidget {
@@ -7,6 +8,8 @@ class ViewAllWalletsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rp = AppResponsive.of(context);
+    
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -15,7 +18,7 @@ class ViewAllWalletsCard extends StatelessWidget {
         );
       },
       child: Container(
-        width: 150,
+        width: rp.walletCardWidth * 0.85, // Proporsional terhadap wallet card lainnya
         margin: const EdgeInsets.only(right: 16, bottom: 8),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -33,38 +36,41 @@ class ViewAllWalletsCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+        child: Padding(
+          padding: rp.cardPadding,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(rp.isTablet ? 14 : 12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_forward,
+                  color: AppColors.primary,
+                  size: rp.isTablet ? 28 : 24,
+                ),
               ),
-              child: const Icon(
-                Icons.arrow_forward,
-                color: AppColors.primary,
-                size: 24,
+              SizedBox(height: rp.isTablet ? 16 : 12),
+              Text(
+                'Lihat Semua',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: rp.isTablet ? 16 : 14,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Lihat Semua',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+              Text(
+                'Dompet Saya',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: rp.isTablet ? 14 : 12,
+                ),
               ),
-            ),
-            const Text(
-              'Dompet Saya',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 12,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/app_responsive.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/navigation_provider.dart';
-import '../../providers/budget_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../widgets/summary_card.dart';
 import '../../widgets/wallet_card.dart';
@@ -12,13 +12,13 @@ import '../../widgets/transaction_detail_modal.dart';
 import '../../widgets/view_all_wallets_card.dart';
 import '../wallet/wallet_management_screen.dart';
 import 'widgets/home_budget_banner.dart';
-import 'package:collection/collection.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rp = AppResponsive.of(context);
     final wallets = ref.watch(walletProvider);
     final transactionsAsync = ref.watch(transactionProvider);
 
@@ -36,14 +36,19 @@ class HomeScreen extends ConsumerWidget {
                 const HomeBudgetBanner(),
 
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                  padding: EdgeInsets.fromLTRB(
+                    rp.pagePadding.left, 
+                    8, 
+                    rp.pagePadding.right, 
+                    12,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Dompet Anda',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: rp.isTablet ? 22 : 18,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textMain,
                         ),
@@ -58,18 +63,26 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                        child: const Text('Kelola'),
+                        child: Text(
+                          'Kelola',
+                          style: TextStyle(fontSize: rp.isTablet ? 16 : 14),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 SizedBox(
-                  height: 156,
+                  height: rp.isTablet ? 180 : 156,
                   child: wallets.isEmpty
-                      ? const Center(child: Text("Belum ada dompet"))
+                      ? Center(
+                          child: Text(
+                            "Belum ada dompet",
+                            style: TextStyle(fontSize: rp.isTablet ? 16 : 14),
+                          ),
+                        )
                       : ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.symmetric(horizontal: rp.pagePadding.left),
                           itemCount: wallets.length > 3
                               ? 4
                               : (wallets.length + 1),
@@ -87,16 +100,16 @@ class HomeScreen extends ConsumerWidget {
                           },
                         ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: rp.sectionSpacing),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: rp.pagePadding.left),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                        Text(
                         'Transaksi Terakhir',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: rp.isTablet ? 22 : 18,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textMain,
                         ),
@@ -104,19 +117,25 @@ class HomeScreen extends ConsumerWidget {
                       TextButton(
                         onPressed: () =>
                             ref.read(navigationProvider.notifier).setIndex(1),
-                        child: const Text('Lihat Semua'),
+                        child: Text(
+                          'Lihat Semua',
+                          style: TextStyle(fontSize: rp.isTablet ? 16 : 14),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: rp.isTablet ? 12 : 8),
                 transactionsAsync.when(
                   data: (transactions) {
                     if (transactions.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32),
-                          child: Text("Belum ada transaksi"),
+                          padding: const EdgeInsets.symmetric(vertical: 32),
+                          child: Text(
+                            "Belum ada transaksi",
+                            style: TextStyle(fontSize: rp.isTablet ? 16 : 14),
+                          ),
                         ),
                       );
                     }
@@ -171,7 +190,7 @@ class HomeScreen extends ConsumerWidget {
                       const Center(child: CircularProgressIndicator()),
                   error: (err, st) => Center(child: Text('Error: $err')),
                 ),
-                const SizedBox(height: 100), // Padding for FAB
+                SizedBox(height: rp.isTablet ? 120 : 100), // Padding for FAB
               ],
             ),
           ),

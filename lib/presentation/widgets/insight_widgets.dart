@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/currency_format.dart';
+import '../../core/utils/app_responsive.dart';
 import '../providers/insight_provider.dart';
 import '../providers/category_provider.dart';
 import '../../data/models/transaction_model.dart';
@@ -15,8 +16,10 @@ class SummaryOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rp = AppResponsive.of(context);
+    
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: rp.cardPadding,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -40,14 +43,16 @@ class SummaryOverviewCard extends StatelessWidget {
             children: [
               _buildSummaryItem(
                 context,
+                rp,
                 'Pemasukan',
                 summary.totalIncome,
                 AppColors.income,
                 Icons.arrow_downward_rounded,
               ),
-              Container(width: 1, height: 50, color: Colors.grey[200]),
+              Container(width: 1, height: rp.isTablet ? 70 : 50, color: Colors.grey[200]),
               _buildSummaryItem(
                 context,
+                rp,
                 'Pengeluaran',
                 summary.totalExpense,
                 AppColors.expense,
@@ -55,16 +60,16 @@ class SummaryOverviewCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: rp.isTablet ? 32 : 24),
           const Divider(height: 1),
-          const SizedBox(height: 20),
+          SizedBox(height: rp.isTablet ? 24 : 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Selisih (Net)',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: rp.isTablet ? 18 : 16,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textSecondary,
                 ),
@@ -72,7 +77,7 @@ class SummaryOverviewCard extends StatelessWidget {
               Text(
                 CurrencyFormat.convertToIdr(summary.netBalance, 0),
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: rp.isTablet ? 24 : 20,
                   fontWeight: FontWeight.bold,
                   color: summary.netBalance >= 0
                       ? AppColors.income
@@ -88,6 +93,7 @@ class SummaryOverviewCard extends StatelessWidget {
 
   Widget _buildSummaryItem(
     BuildContext context,
+    AppResponsive rp,
     String label,
     double amount,
     Color color,
@@ -99,12 +105,12 @@ class SummaryOverviewCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 14, color: color),
+              Icon(icon, size: rp.isTablet ? 16 : 14, color: color),
               const SizedBox(width: 4),
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 13,
+                style: TextStyle(
+                  fontSize: rp.isTablet ? 15 : 13,
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -115,7 +121,7 @@ class SummaryOverviewCard extends StatelessWidget {
             child: Text(
               CurrencyFormat.convertToIdr(amount, 0),
               style: TextStyle(
-                fontSize: 20,
+                fontSize: rp.isTablet ? 24 : 20,
                 fontWeight: FontWeight.w900,
                 color: color,
                 letterSpacing: -0.5,
@@ -136,19 +142,20 @@ class TopSpendingList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (spendings.isEmpty) return const SizedBox();
+    final rp = AppResponsive.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Analisis Per Kategori',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: rp.isTablet ? 22 : 18,
             fontWeight: FontWeight.bold,
             color: AppColors.textMain,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: rp.isTablet ? 20 : 16),
         ...spendings.take(5).map((s) {
           final categoriesAsync = ref.watch(categoryProvider);
           return categoriesAsync.when(
@@ -159,8 +166,8 @@ class TopSpendingList extends ConsumerWidget {
               if (cat == null) return const SizedBox();
 
               return Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
+                margin: EdgeInsets.only(bottom: rp.itemSpacing),
+                padding: rp.cardPadding,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -181,26 +188,30 @@ class TopSpendingList extends ConsumerWidget {
                               ),
                               child: Icon(
                                 IconData(cat.icon, fontFamily: 'MaterialIcons'),
-                                size: 16,
+                                size: rp.isTablet ? 20 : 16,
                                 color: AppColors.primary,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Text(
                               cat.name,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
+                                fontSize: rp.isTablet ? 16 : 14,
                               ),
                             ),
                           ],
                         ),
                         Text(
                           CurrencyFormat.convertToIdr(s.amount, 0),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: rp.isTablet ? 16 : 14,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: rp.isTablet ? 16 : 12),
                     TweenAnimationBuilder<double>(
                       duration: const Duration(milliseconds: 1000),
                       curve: Curves.easeOutCubic,
@@ -213,7 +224,7 @@ class TopSpendingList extends ConsumerWidget {
                             alpha: 0.05,
                           ),
                           color: AppColors.primary,
-                          minHeight: 8,
+                          minHeight: rp.isTablet ? 10 : 8,
                         ),
                       ),
                     ),
@@ -224,7 +235,7 @@ class TopSpendingList extends ConsumerWidget {
                         Text(
                           '${s.percentage.toStringAsFixed(1)}%',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: rp.isTablet ? 14 : 12,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary.withValues(alpha: 0.7),
                           ),
@@ -232,7 +243,7 @@ class TopSpendingList extends ConsumerWidget {
                         Text(
                           'dari total pengeluaran',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: rp.isTablet ? 13 : 11,
                             color: Colors.grey[400],
                           ),
                         ),
@@ -259,19 +270,20 @@ class LargestTransactionsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (transactions.isEmpty) return const SizedBox();
+    final rp = AppResponsive.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Transaksi Terbesar (Bulan Ini)',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: rp.isTablet ? 22 : 18,
             fontWeight: FontWeight.bold,
             color: AppColors.textMain,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: rp.isTablet ? 20 : 16),
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -289,7 +301,12 @@ class LargestTransactionsList extends ConsumerWidget {
                   return Column(
                     children: [
                       ListTile(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: rp.isTablet ? 24 : 16,
+                          vertical: rp.isTablet ? 8 : 0,
+                        ),
                         leading: CircleAvatar(
+                          radius: rp.isTablet ? 24 : 20,
                           backgroundColor: AppColors.expense.withValues(
                             alpha: 0.1,
                           ),
@@ -301,16 +318,16 @@ class LargestTransactionsList extends ConsumerWidget {
                                   )
                                 : Icons.money_off,
                             color: AppColors.expense,
-                            size: 18,
+                            size: rp.isTablet ? 22 : 18,
                           ),
                         ),
                         title: Text(
                           (tx.note?.isEmpty ?? true)
                               ? (cat?.name ?? 'Pengeluaran')
                               : tx.note!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                            fontSize: rp.isTablet ? 16 : 14,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -318,21 +335,21 @@ class LargestTransactionsList extends ConsumerWidget {
                         subtitle: Text(
                           DateFormat('dd MMM').format(tx.date),
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: rp.isTablet ? 14 : 12,
                             color: Colors.grey[400],
                           ),
                         ),
                         trailing: Text(
                           '-${CurrencyFormat.convertToIdr(tx.amount, 0)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: AppColors.expense,
-                            fontSize: 14,
+                            fontSize: rp.isTablet ? 16 : 14,
                           ),
                         ),
                       ),
                       if (index < transactions.length - 1)
-                        const Divider(height: 1, indent: 70),
+                        Divider(height: 1, indent: rp.isTablet ? 80 : 70),
                     ],
                   );
                 },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/filter_provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/app_responsive.dart';
 
 class FilterBarWidget extends ConsumerWidget {
   const FilterBarWidget({super.key});
@@ -9,40 +10,50 @@ class FilterBarWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(filterProvider);
+    final rp = AppResponsive.of(context);
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: rp.pagePadding.left, 
+        vertical: rp.isTablet ? 16 : 10,
+      ),
       child: Row(
         children: [
           _buildFilterChip(
             context,
+            rp,
             'Semua',
             filter.type == null,
             () => ref.read(filterProvider.notifier).updateType(null),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: rp.itemSpacing),
           _buildFilterChip(
             context,
+            rp,
             'Pemasukan',
             filter.type == 'income',
             () => ref.read(filterProvider.notifier).updateType('income'),
             activeColor: AppColors.income,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: rp.itemSpacing),
           _buildFilterChip(
             context,
+            rp,
             'Pengeluaran',
             filter.type == 'expense',
             () => ref.read(filterProvider.notifier).updateType('expense'),
             activeColor: AppColors.expense,
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: rp.itemSpacing * 2),
           IconButton(
-            onPressed: () => _showFilterBottomSheet(context, ref),
-            icon: const Icon(Icons.tune_rounded, size: 20),
+            onPressed: () => _showFilterBottomSheet(context, ref, rp),
+            icon: Icon(Icons.tune_rounded, size: rp.isTablet ? 24 : 20),
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            constraints: BoxConstraints(
+              minWidth: rp.isTablet ? 48 : 40, 
+              minHeight: rp.isTablet ? 48 : 40,
+            ),
             style: IconButton.styleFrom(
               backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
@@ -58,6 +69,7 @@ class FilterBarWidget extends ConsumerWidget {
 
   Widget _buildFilterChip(
     BuildContext context,
+    AppResponsive rp,
     String label,
     bool isSelected,
     VoidCallback onTap, {
@@ -67,7 +79,10 @@ class FilterBarWidget extends ConsumerWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: rp.isTablet ? 20 : 16, 
+          vertical: rp.isTablet ? 12 : 8,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? (activeColor ?? AppColors.primary) : Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -87,35 +102,49 @@ class FilterBarWidget extends ConsumerWidget {
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.grey[600],
             fontWeight: FontWeight.bold,
-            fontSize: 13,
+            fontSize: rp.isTablet ? 15 : 13,
           ),
         ),
       ),
     );
   }
 
-  void _showFilterBottomSheet(BuildContext context, WidgetRef ref) {
+  void _showFilterBottomSheet(BuildContext context, WidgetRef ref, AppResponsive rp) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      constraints: BoxConstraints(maxWidth: rp.isTablet ? 600 : double.infinity),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         final currentFilter = ref.watch(filterProvider);
         return Container(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(rp.isTablet ? 32 : 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Filter Lanjutan', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
+              Text(
+                'Filter Lanjutan', 
+                style: TextStyle(
+                  fontSize: rp.isTablet ? 22 : 18, 
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: rp.sectionSpacing),
               ListTile(
-                leading: const Icon(Icons.calendar_today_rounded),
-                title: const Text('Rentang Tanggal'),
-                subtitle: currentFilter.startDate != null 
-                  ? Text('${currentFilter.startDate.toString().split(' ')[0]} - ${currentFilter.endDate.toString().split(' ')[0]}')
-                  : const Text('Semua waktu'),
+                leading: Icon(Icons.calendar_today_rounded, size: rp.isTablet ? 28 : 24),
+                title: Text(
+                  'Rentang Tanggal',
+                  style: TextStyle(fontSize: rp.isTablet ? 18 : 16),
+                ),
+                subtitle: Text(
+                  currentFilter.startDate != null 
+                    ? '${currentFilter.startDate.toString().split(' ')[0]} - ${currentFilter.endDate.toString().split(' ')[0]}'
+                    : 'Semua waktu',
+                  style: TextStyle(fontSize: rp.isTablet ? 15 : 13),
+                ),
                 onTap: () async {
                    final range = await showDateRangePicker(
                     context: context,
@@ -124,19 +153,23 @@ class FilterBarWidget extends ConsumerWidget {
                   );
                   if (range != null) {
                     ref.read(filterProvider.notifier).updateDateRange(range.start, range.end);
+                    if (!context.mounted) return;
                     Navigator.pop(context);
                   }
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.refresh_rounded),
-                title: const Text('Reset Semua Filter'),
+                leading: Icon(Icons.refresh_rounded, size: rp.isTablet ? 28 : 24),
+                title: Text(
+                  'Reset Semua Filter',
+                  style: TextStyle(fontSize: rp.isTablet ? 18 : 16),
+                ),
                 onTap: () {
                   ref.read(filterProvider.notifier).reset();
                   Navigator.pop(context);
                 },
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: rp.sectionSpacing),
             ],
           ),
         );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/app_responsive.dart';
 import 'package:intl/intl.dart';
 
 class CategoryExpenseChart extends StatefulWidget {
@@ -28,22 +29,29 @@ class _CategoryExpenseChartState extends State<CategoryExpenseChart> {
 
   @override
   Widget build(BuildContext context) {
+    final rp = AppResponsive.of(context);
+    
     if (widget.sections.isEmpty) {
       return Container(
-        height: 200,
+        height: rp.isTablet ? 250 : 200,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Text('Belum ada data pengeluaran bulan ini', 
-          style: TextStyle(color: Colors.grey)),
+        child: Text(
+          'Belum ada data pengeluaran bulan ini', 
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: rp.isTablet ? 16 : 14,
+          ),
+        ),
       );
     }
 
     return Container(
-      height: 350,
-      padding: const EdgeInsets.all(20),
+      height: rp.isTablet ? 450 : 350,
+      padding: rp.cardPadding,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -57,14 +65,20 @@ class _CategoryExpenseChartState extends State<CategoryExpenseChart> {
       ),
       child: Column(
         children: [
-          const Text(
+          Text(
             'Pengeluaran per Kategori',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold, 
+              fontSize: rp.isTablet ? 20 : 16,
+            ),
           ),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'Sentuh bagian diagram untuk detail',
-            style: TextStyle(fontSize: 11, color: Colors.grey),
+            style: TextStyle(
+              fontSize: rp.isTablet ? 13 : 11, 
+              color: Colors.grey,
+            ),
           ),
           const SizedBox(height: 10),
           Expanded(
@@ -86,12 +100,12 @@ class _CategoryExpenseChartState extends State<CategoryExpenseChart> {
                         });
                       },
                     ),
-                    sections: showingSections(),
-                    centerSpaceRadius: 60,
+                    sections: showingSections(rp),
+                    centerSpaceRadius: rp.isTablet ? 80 : 60,
                     sectionsSpace: 2,
                   ),
                 ),
-                _buildCenterText(),
+                _buildCenterText(rp),
               ],
             ),
           ),
@@ -100,7 +114,7 @@ class _CategoryExpenseChartState extends State<CategoryExpenseChart> {
     );
   }
 
-  Widget _buildCenterText() {
+  Widget _buildCenterText(AppResponsive rp) {
     bool isTouched = touchedIndex != -1 && touchedIndex < widget.categoryNames.length;
     
     String label = isTouched ? widget.categoryNames[touchedIndex] : 'Total';
@@ -115,7 +129,11 @@ class _CategoryExpenseChartState extends State<CategoryExpenseChart> {
           child: Text(
             label,
             key: ValueKey(label),
-            style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: isTouched ? FontWeight.bold : FontWeight.normal),
+            style: TextStyle(
+              fontSize: rp.isTablet ? 14 : 12, 
+              color: Colors.grey[600], 
+              fontWeight: isTouched ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ),
         AnimatedSwitcher(
@@ -125,7 +143,7 @@ class _CategoryExpenseChartState extends State<CategoryExpenseChart> {
             key: ValueKey(value),
             style: TextStyle(
               fontWeight: FontWeight.bold, 
-              fontSize: 16, 
+              fontSize: rp.isTablet ? 20 : 16, 
               color: color
             ),
           ),
@@ -134,12 +152,18 @@ class _CategoryExpenseChartState extends State<CategoryExpenseChart> {
     );
   }
 
-  List<PieChartSectionData> showingSections() {
+  List<PieChartSectionData> showingSections(AppResponsive rp) {
     return List.generate(widget.sections.length, (i) {
       final isTouched = i == touchedIndex;
-      final fontSize = isTouched ? 16.0 : 12.0;
-      final radius = isTouched ? 65.0 : 55.0;
-      final badgeSize = isTouched ? 42.0 : 32.0;
+      final fontSize = isTouched 
+          ? (rp.isTablet ? 20.0 : 16.0) 
+          : (rp.isTablet ? 16.0 : 12.0);
+      final radius = isTouched 
+          ? (rp.isTablet ? 85.0 : 65.0) 
+          : (rp.isTablet ? 75.0 : 55.0);
+      final badgeSize = isTouched 
+          ? (rp.isTablet ? 52.0 : 42.0) 
+          : (rp.isTablet ? 42.0 : 32.0);
       
       final section = widget.sections[i];
 

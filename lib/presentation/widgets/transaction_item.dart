@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/utils/currency_format.dart';
-
+import '../../core/utils/app_responsive.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/category_model.dart';
 
@@ -23,14 +23,18 @@ class TransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rp = AppResponsive.of(context);
     bool isIncome = type == 'income';
     Color color = isIncome ? AppColors.income : AppColors.expense;
     
     return ListTile(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: rp.pagePadding.left, 
+        vertical: rp.isTablet ? 8 : 4,
+      ),
       leading: Container(
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.all(rp.isTablet ? 12 : 10),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           shape: BoxShape.circle,
@@ -40,27 +44,30 @@ class TransactionItem extends StatelessWidget {
               ? IconData(category!.icon, fontFamily: 'MaterialIcons')
               : (isIncome ? Icons.arrow_downward : Icons.arrow_upward),
           color: color,
-          size: 24,
+          size: rp.isTablet ? 28 : 24,
         ),
       ),
       title: Text(
         category?.name ?? 'Kategori Dihapus', 
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.bold,
           color: AppColors.textMain,
-          fontSize: 16,
+          fontSize: rp.isTablet ? 18 : 16,
         ),
       ),
       subtitle: Text(
         DateFormat('dd MMM yyyy, HH:mm').format(date),
-        style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        style: TextStyle(
+          color: AppColors.textSecondary, 
+          fontSize: rp.captionFontSize + 2,
+        ),
       ),
       trailing: Text(
         '${isIncome ? '+' : '-'}${CurrencyFormat.convertToIdr(amount, 0)}',
         style: TextStyle(
           color: color,
           fontWeight: FontWeight.bold,
-          fontSize: 16,
+          fontSize: rp.isTablet ? 18 : 16,
         ),
       ),
     );

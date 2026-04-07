@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/app_responsive.dart';
 import '../../providers/category_provider.dart';
 import '../../../data/models/category_model.dart';
 import 'add_edit_category_screen.dart';
@@ -10,6 +11,7 @@ class CategoryManagementScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rp = AppResponsive.of(context);
     final categoriesAsync = ref.watch(categoryProvider);
 
     return DefaultTabController(
@@ -17,10 +19,17 @@ class CategoryManagementScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Manajemen Kategori'),
-          bottom: const TabBar(
+          bottom: TabBar(
             labelColor: Colors.black,
             unselectedLabelColor: Colors.grey,
-            tabs: [
+            labelStyle: TextStyle(
+              fontSize: rp.isTablet ? 16 : 14, 
+              fontWeight: FontWeight.bold,
+            ),
+            unselectedLabelStyle: TextStyle(
+              fontSize: rp.isTablet ? 16 : 14,
+            ),
+            tabs: const [
               Tab(text: 'Pengeluaran'),
               Tab(text: 'Pemasukan'),
             ],
@@ -36,8 +45,8 @@ class CategoryManagementScreen extends ConsumerWidget {
 
                   return TabBarView(
                     children: [
-                      _CategoryList(categories: expenses, type: 'expense'),
-                      _CategoryList(categories: incomes, type: 'income'),
+                      _CategoryList(categories: expenses, type: 'expense', rp: rp),
+                      _CategoryList(categories: incomes, type: 'income', rp: rp),
                     ],
                   );
                 },
@@ -47,14 +56,18 @@ class CategoryManagementScreen extends ConsumerWidget {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AddEditCategoryScreen()),
-            );
-          },
-          child: const Icon(Icons.add),
+        floatingActionButton: SizedBox(
+          width: rp.isTablet ? 72 : 56,
+          height: rp.isTablet ? 72 : 56,
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddEditCategoryScreen()),
+              );
+            },
+            child: Icon(Icons.add, size: rp.isTablet ? 32 : 24),
+          ),
         ),
       ),
     );
@@ -64,8 +77,9 @@ class CategoryManagementScreen extends ConsumerWidget {
 class _CategoryList extends ConsumerWidget {
   final List<Category> categories;
   final String type;
+  final AppResponsive rp;
 
-  const _CategoryList({required this.categories, required this.type});
+  const _CategoryList({required this.categories, required this.type, required this.rp});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -74,16 +88,29 @@ class _CategoryList extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.category_outlined, size: 64, color: Colors.grey[300]),
+            Icon(
+              Icons.category_outlined, 
+              size: rp.isTablet ? 80 : 64, 
+              color: Colors.grey[300],
+            ),
             const SizedBox(height: 16),
-            Text('Belum ada kategori', style: TextStyle(color: Colors.grey[500], fontSize: 16)),
+            Text(
+              'Belum ada kategori', 
+              style: TextStyle(
+                color: Colors.grey[500], 
+                fontSize: rp.isTablet ? 18 : 16,
+              ),
+            ),
           ],
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: rp.pagePadding.left, 
+        vertical: 16,
+      ),
       itemCount: categories.length,
       itemBuilder: (context, index) {
         final category = categories[index];
@@ -103,9 +130,12 @@ class _CategoryList extends ConsumerWidget {
             ],
           ),
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: rp.isTablet ? 20 : 16, 
+              vertical: rp.isTablet ? 12 : 8,
+            ),
             leading: Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(rp.isTablet ? 14 : 12),
               decoration: BoxDecoration(
                 color: category.isActive ? primaryColor.withValues(alpha: 0.1) : Colors.grey[100],
                 shape: BoxShape.circle,
@@ -113,14 +143,14 @@ class _CategoryList extends ConsumerWidget {
               child: Icon(
                 IconData(category.icon, fontFamily: 'MaterialIcons'),
                 color: category.isActive ? primaryColor : Colors.grey[400],
-                size: 24,
+                size: rp.isTablet ? 28 : 24,
               ),
             ),
             title: Text(
               category.name,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: rp.isTablet ? 18 : 16,
                 color: category.isActive ? AppColors.textMain : Colors.grey[400],
                 decoration: category.isActive ? null : TextDecoration.lineThrough,
               ),
@@ -128,7 +158,7 @@ class _CategoryList extends ConsumerWidget {
             subtitle: Text(
               category.isActive ? 'Aktif' : 'Nonaktif',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: rp.isTablet ? 14 : 12,
                 color: category.isActive ? primaryColor.withValues(alpha: 0.7) : Colors.grey[400],
               ),
             ),
@@ -136,7 +166,11 @@ class _CategoryList extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.edit_note_rounded, color: Colors.indigo),
+                  icon: Icon(
+                    Icons.edit_note_rounded, 
+                    color: Colors.indigo,
+                    size: rp.isTablet ? 28 : 24,
+                  ),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -147,10 +181,11 @@ class _CategoryList extends ConsumerWidget {
                   },
                 ),
                 Transform.scale(
-                  scale: 0.8,
+                  scale: rp.isTablet ? 0.9 : 0.8,
                   child: Switch(
                     value: category.isActive,
-                    activeColor: primaryColor,
+                    activeTrackColor: primaryColor.withValues(alpha: 0.5),
+                    activeThumbColor: primaryColor,
                     onChanged: (val) {
                       ref.read(categoryProvider.notifier).updateCategory(
                         Category(

@@ -9,19 +9,22 @@ import '../../providers/budget_provider.dart';
 import '../../providers/recurring_provider.dart';
 import '../../providers/chart_provider.dart';
 import '../../../core/database/db_helper.dart';
+import '../../../core/utils/app_responsive.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final rp = AppResponsive.of(context);
+
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.fromLTRB(rp.pagePadding.left, 20, rp.pagePadding.right, 20),
       children: [
-        const Text(
+        Text(
           'Kelola Data',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: rp.isTablet ? 16 : 14,
             fontWeight: FontWeight.bold,
             color: Colors.grey,
             letterSpacing: 1.2,
@@ -30,6 +33,7 @@ class SettingsScreen extends ConsumerWidget {
         const SizedBox(height: 16),
         _buildManagementCard(
           context: context,
+          rp: rp,
           title: 'Dompet & Saldo',
           subtitle: 'Atur daftar dompet penyimpanan',
           icon: Icons.account_balance_wallet_rounded,
@@ -44,6 +48,7 @@ class SettingsScreen extends ConsumerWidget {
         const SizedBox(height: 12),
         _buildManagementCard(
           context: context,
+          rp: rp,
           title: 'Kategori Transaksi',
           subtitle: 'Atur kategori pemasukan/pengeluaran',
           icon: Icons.category_rounded,
@@ -58,6 +63,7 @@ class SettingsScreen extends ConsumerWidget {
         const SizedBox(height: 12),
         _buildManagementCard(
           context: context,
+          rp: rp,
           title: 'Anggaran Bulanan',
           subtitle: 'Atur limit pengeluaran bulanan',
           icon: Icons.track_changes_rounded,
@@ -68,10 +74,10 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 32),
-        const Text(
+        Text(
           'Lainnya',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: rp.isTablet ? 16 : 14,
             fontWeight: FontWeight.bold,
             color: Colors.grey,
             letterSpacing: 1.2,
@@ -79,6 +85,7 @@ class SettingsScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         _buildActionTile(
+          rp: rp,
           title: 'Hapus Semua Data',
           subtitle: 'Reset aplikasi ke pengaturan awal',
           icon: Icons.delete_forever_rounded,
@@ -86,12 +93,15 @@ class SettingsScreen extends ConsumerWidget {
           onTap: () => _confirmReset(context, ref),
         ),
         const Divider(height: 32),
-        const AboutListTile(
-          icon: Icon(Icons.info_outline_rounded),
+        AboutListTile(
+          icon: Icon(Icons.info_outline_rounded, size: rp.isTablet ? 28 : 24),
           applicationName: 'Keuanganku',
           applicationVersion: '1.0.0 (MVP)',
           applicationLegalese: '© 2026 Dimas',
-          child: Text('Tentang Aplikasi'),
+          child: Text(
+            'Tentang Aplikasi', 
+            style: TextStyle(fontSize: rp.isTablet ? 17 : 15),
+          ),
         ),
       ],
     );
@@ -99,6 +109,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildManagementCard({
     required BuildContext context,
+    required AppResponsive rp,
     required String title,
     required String subtitle,
     required IconData icon,
@@ -109,7 +120,7 @@ class SettingsScreen extends ConsumerWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(rp.isTablet ? 24 : 20),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(20),
@@ -118,12 +129,12 @@ class SettingsScreen extends ConsumerWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(rp.isTablet ? 14 : 12),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: color, size: 28),
+              child: Icon(icon, color: color, size: rp.isTablet ? 32 : 28),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -132,20 +143,27 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: rp.isTablet ? 18 : 16,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    style: TextStyle(
+                      color: Colors.grey[600], 
+                      fontSize: rp.isTablet ? 15 : 13,
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: Colors.grey[400]),
+            Icon(
+              Icons.chevron_right_rounded, 
+              color: Colors.grey[400],
+              size: rp.isTablet ? 28 : 24,
+            ),
           ],
         ),
       ),
@@ -153,6 +171,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildActionTile({
+    required AppResponsive rp,
     required String title,
     required String subtitle,
     required IconData icon,
@@ -162,18 +181,25 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.all(rp.isTablet ? 12 : 10),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: color, size: 24),
+        child: Icon(icon, color: color, size: rp.isTablet ? 28 : 24),
       ),
       title: Text(
         title,
-        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: color, 
+          fontWeight: FontWeight.bold,
+          fontSize: rp.isTablet ? 17 : 15,
+        ),
       ),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+      subtitle: Text(
+        subtitle, 
+        style: TextStyle(fontSize: rp.isTablet ? 14 : 12),
+      ),
       onTap: onTap,
     );
   }

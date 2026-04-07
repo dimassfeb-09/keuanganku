@@ -72,10 +72,12 @@ final filteredTransactionsProvider = Provider<List<Transaction>>((ref) {
     data: (transactions) {
       return transactions.where((tx) {
         if (filter.type != null && tx.type != filter.type) return false;
-        if (filter.categoryId != null && tx.categoryId != filter.categoryId)
+        if (filter.categoryId != null && tx.categoryId != filter.categoryId) {
           return false;
-        if (filter.walletId != null && tx.walletId != filter.walletId)
+        }
+        if (filter.walletId != null && tx.walletId != filter.walletId) {
           return false;
+        }
         if (filter.startDate != null && filter.endDate != null) {
           final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
           final start = DateTime(
